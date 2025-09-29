@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengubah Nama File Otomatis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a6cf7;
+            --secondary-color: #6b7280;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --light-color: #f9fafb;
+            --dark-color: #1f2937;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7ff;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: white;
+            box-shadow: var(--box-shadow);
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .logo i {
+            margin-right: 10px;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .upload-section {
+            flex: 1;
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .file-list-section {
+            flex: 1;
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+        }
+
+        h1, h2 {
+            margin-bottom: 20px;
+            color: var(--dark-color);
+        }
+
+        h1 {
+            font-size: 28px;
+        }
+
+        h2 {
+            font-size: 22px;
+            border-bottom: 2px solid var(--light-color);
+            padding-bottom: 10px;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--primary-color);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            background-color: rgba(74, 108, 247, 0.05);
+        }
+
+        .upload-area.dragover {
+            background-color: rgba(74, 108, 247, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background-color: #3a5bd9;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background-color: #059669;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+        }
+
+        .btn-warning:hover {
+            background-color: #d97706;
+        }
+
+        .file-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--light-color);
+            cursor: move;
+            transition: all 0.3s ease;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-item.dragging {
+            opacity: 0.5;
+        }
+
+        .file-item.drag-over {
+            border-top: 3px solid var(--primary-color);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .file-icon {
+            font-size: 24px;
+            margin-right: 15px;
+            color: var(--secondary-color);
+        }
+
+        .file-details {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .file-name-input {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid var(--light-color);
+            border-radius: 4px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .file-size {
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--secondary-color);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            display: flex;
+            align-items: center;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .notification-icon {
+            margin-right: 15px;
+            font-size: 20px;
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .notification.success .notification-icon {
+            color: var(--success-color);
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .notification.error .notification-icon {
+            color: var(--danger-color);
+        }
+
+        .notification.info {
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .notification.info .notification-icon {
+            color: var(--primary-color);
+        }
+
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: var(--light-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            margin-top: 5px;
+            font-size: 14px;
+            color: var(--secondary-color);
+            text-align: right;
+        }
+
+        .drag-handle {
+            margin-right: 10px;
+            color: var(--secondary-color);
+            cursor: move;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .file-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .file-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-file-code"></i>
+                    Pengubah Nama File Otomatis
+                </div>
+                <div class="header-info">
+                    <span id="fileCount">0 file</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="main-content">
+            <div class="upload-section">
+                <h2>Upload File</h2>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div class="upload-text">
+                        <p>Drag & drop file di sini atau klik untuk browse</p>
+                    </div>
+                    <button class="btn">Pilih File</button>
+                    <input type="file" id="fileInput" class="file-input" multiple>
+                </div>
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar">
+                        <div class="progress" id="progressBar"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">0%</div>
+                </div>
+            </div>
+
+            <div class="file-list-section">
+                <h2>Daftar File</h2>
+                <div class="file-list" id="fileList">
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <p>Belum ada file yang diupload</p>
+                    </div>
+                </div>
+                <div class="action-buttons" id="actionButtons" style="display: none;">
+                    <button class="btn btn-success" id="downloadAllBtn">
+                        <i class="fas fa-download"></i> Download Semua (ZIP)
+                    </button>
+                    <button class="btn btn-danger" id="clearAllBtn">
+                        <i class="fas fa-trash-alt"></i> Hapus Semua
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        <div class="notification-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="notification-message"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const fileList = document.getElementById('fileList');
+            const actionButtons = document.getElementById('actionButtons');
+            const downloadAllBtn = document.getElementById('downloadAllBtn');
+            const clearAllBtn = document.getElementById('clearAllBtn');
+            const fileCount = document.getElementById('fileCount');
+            const notification = document.getElementById('notification');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            let uploadedFiles = [];
+            let fileCounter = 1;
+            let draggedElement = null;
+
+            // Event listeners
+            uploadArea.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', handleFileSelect);
+            downloadAllBtn.addEventListener('click', downloadAllFiles);
+            clearAllBtn.addEventListener('click', clearAllFiles);
+
+            // Drag and drop events for upload area
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => {
+                    uploadArea.classList.add('dragover');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => {
+                    uploadArea.classList.remove('dragover');
+                }, false);
+            });
+
+            uploadArea.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles(files);
+            }
+
+            function handleFileSelect(e) {
+                const files = e.target.files;
+                handleFiles(files);
+            }
+
+            function handleFiles(files) {
+                if (files.length === 0) return;
+                
+                showProgress();
+                
+                // Simulate progress
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 10;
+                    updateProgress(progress);
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            hideProgress();
+                            processFiles(files);
+                        }, 300);
+                    }
+                }, 100);
+            }
+
+            function processFiles(files) {
+                Array.from(files).forEach(file => {
+                    const newFileName = generateFileName(fileCounter);
+                    fileCounter++;
+                    
+                    const fileObj = {
+                        originalFile: file,
+                        newName: newFileName,
+                        id: Date.now() + Math.random()
+                    };
+                    
+                    uploadedFiles.push(fileObj);
+                    addFileToList(fileObj);
+                });
+                
+                updateFileCount();
+                showNotification('success', `${files.length} file berhasil diupload!`);
+            }
+
+            function generateFileName(number) {
+                return number.toString().padStart(2, '0');
+            }
+
+            function addFileToList(fileObj) {
+                if (fileList.querySelector('.empty-state')) {
+                    fileList.innerHTML = '';
+                }
+                
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.dataset.id = fileObj.id;
+                fileItem.draggable = true;
+                
+                const dragHandle = document.createElement('i');
+                dragHandle.className = 'drag-handle fas fa-grip-vertical';
+                
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'file-info';
+                
+                const fileIcon = document.createElement('i');
+                fileIcon.className = 'file-icon fas fa-file';
+                
+                const fileDetails = document.createElement('div');
+                fileDetails.className = 'file-details';
+                
+                const fileName = document.createElement('div');
+                fileName.className = 'file-name';
+                
+                const fileNameInput = document.createElement('input');
+                fileNameInput.className = 'file-name-input';
+                fileNameInput.type = 'text';
+                fileNameInput.value = fileObj.newName;
+                fileNameInput.addEventListener('change', function() {
+                    fileObj.newName = this.value;
+                    showNotification('info', 'Nama file berhasil diubah!');
+                });
+                
+                fileName.appendChild(fileNameInput);
+                
+                const fileSize = document.createElement('div');
+                fileSize.className = 'file-size';
+                fileSize.textContent = formatFileSize(fileObj.originalFile.size);
+                
+                fileDetails.appendChild(fileName);
+                fileDetails.appendChild(fileSize);
+                
+                fileInfo.appendChild(dragHandle);
+                fileInfo.appendChild(fileIcon);
+                fileInfo.appendChild(fileDetails);
+                
+                const fileActions = document.createElement('div');
+                fileActions.className = 'file-actions';
+                
+                const downloadBtn = document.createElement('button');
+                downloadBtn.className = 'btn btn-small btn-success';
+                downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download';
+                downloadBtn.addEventListener('click', () => downloadFile(fileObj));
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn btn-small btn-danger';
+                deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Hapus';
+                deleteBtn.addEventListener('click', () => removeFile(fileObj.id));
+                
+                fileActions.appendChild(downloadBtn);
+                fileActions.appendChild(deleteBtn);
+                
+                fileItem.appendChild(fileInfo);
+                fileItem.appendChild(fileActions);
+                
+                // Add drag event listeners
+                fileItem.addEventListener('dragstart', handleDragStart);
+                fileItem.addEventListener('dragend', handleDragEnd);
+                fileItem.addEventListener('dragover', handleDragOver);
+                fileItem.addEventListener('drop', handleItemDrop);
+                fileItem.addEventListener('dragenter', handleDragEnter);
+                fileItem.addEventListener('dragleave', handleDragLeave);
+                
+                fileList.appendChild(fileItem);
+                
+                actionButtons.style.display = 'flex';
+            }
+
+            function getFileExtension(filename) {
+                return filename.split('.').pop();
+            }
+
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            // Drag and drop functions for reordering
+            function handleDragStart(e) {
+                draggedElement = this;
+                this.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/html', this.innerHTML);
+            }
+
+            function handleDragEnd(e) {
+                this.classList.remove('dragging');
+                
+                // Remove all drag-over classes
+                const fileItems = fileList.querySelectorAll('.file-item');
+                fileItems.forEach(item => {
+                    item.classList.remove('drag-over');
+                });
+            }
+
+            function handleDragOver(e) {
+                if (e.preventDefault) {
+                    e.preventDefault();
+                }
+                e.dataTransfer.dropEffect = 'move';
+                return false;
+            }
+
+            function handleDragEnter(e) {
+                this.classList.add('drag-over');
+            }
+
+            function handleDragLeave(e) {
+                this.classList.remove('drag-over');
+            }
+
+            function handleItemDrop(e) {
+                if (e.stopPropagation) {
+                    e.stopPropagation();
+                }
+                
+                if (draggedElement !== this) {
+                    const draggedId = draggedElement.dataset.id;
+                    const targetId = this.dataset.id;
+                    
+                    const draggedIndex = uploadedFiles.findIndex(file => file.id == draggedId);
+                    const targetIndex = uploadedFiles.findIndex(file => file.id == targetId);
+                    
+                    if (draggedIndex !== -1 && targetIndex !== -1) {
+                        // Remove dragged item from array
+                        const [draggedFile] = uploadedFiles.splice(draggedIndex, 1);
+                        
+                        // Insert dragged item at new position
+                        uploadedFiles.splice(targetIndex, 0, draggedFile);
+                        
+                        // Update DOM
+                        updateFileList();
+                        showNotification('info', 'Urutan file berhasil diubah!');
+                    }
+                }
+                
+                return false;
+            }
+
+            function updateFileList() {
+                // Save current input values
+                const currentValues = {};
+                const fileItems = fileList.querySelectorAll('.file-item');
+                fileItems.forEach(item => {
+                    const id = item.dataset.id;
+                    const input = item.querySelector('.file-name-input');
+                    if (input) {
+                        currentValues[id] = input.value;
+                    }
+                });
+                
+                // Clear file list
+                fileList.innerHTML = '';
+                
+                // Add files back in new order
+                uploadedFiles.forEach(fileObj => {
+                    // Use saved value if exists, otherwise use the file object's name
+                    if (currentValues[fileObj.id]) {
+                        fileObj.newName = currentValues[fileObj.id];
+                    }
+                    addFileToList(fileObj);
+                });
+                
+                if (uploadedFiles.length === 0) {
+                    fileList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-folder-open"></i>
+                            <p>Belum ada file yang diupload</p>
+                        </div>
+                    `;
+                    actionButtons.style.display = 'none';
+                }
+            }
+
+            function downloadFile(fileObj) {
+                const extension = getFileExtension(fileObj.originalFile.name);
+                const newFileName = `${fileObj.newName}.${extension}`;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const blob = new Blob([e.target.result], { type: fileObj.originalFile.type });
+                    saveAs(blob, newFileName);
+                    showNotification('success', `File ${newFileName} berhasil diunduh!`);
+                };
+                reader.readAsArrayBuffer(fileObj.originalFile);
+            }
+
+            function downloadAllFiles() {
+                if (uploadedFiles.length === 0) return;
+                
+                const zip = new JSZip();
+                
+                showProgress();
+                
+                let processedFiles = 0;
+                uploadedFiles.forEach(fileObj => {
+                    const extension = getFileExtension(fileObj.originalFile.name);
+                    const newFileName = `${fileObj.newName}.${extension}`;
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        zip.file(newFileName, e.target.result);
+                        processedFiles++;
+                        
+                        updateProgress((processedFiles / uploadedFiles.length) * 100);
+                        
+                        if (processedFiles === uploadedFiles.length) {
+                            zip.generateAsync({ type: 'blob' }).then(function(content) {
+                                saveAs(content, 'renamed_files.zip');
+                                hideProgress();
+                                showNotification('success', 'Semua file berhasil diunduh dalam format ZIP!');
+                            });
+                        }
+                    };
+                    reader.readAsArrayBuffer(fileObj.originalFile);
+                });
+            }
+
+            function removeFile(fileId) {
+                uploadedFiles = uploadedFiles.filter(file => file.id !== fileId);
+                const fileItem = fileList.querySelector(`[data-id="${fileId}"]`);
+                if (fileItem) {
+                    fileItem.remove();
+                }
+                
+                updateFileCount();
+                
+                if (uploadedFiles.length === 0) {
+                    fileList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-folder-open"></i>
+                            <p>Belum ada file yang diupload</p>
+                        </div>
+                    `;
+                    actionButtons.style.display = 'none';
+                }
+                
+                showNotification('info', 'File berhasil dihapus!');
+            }
+
+            function clearAllFiles() {
+                if (uploadedFiles.length === 0) return;
+                
+                if (confirm('Apakah Anda yakin ingin menghapus semua file?')) {
+                    uploadedFiles = [];
+                    fileList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-folder-open"></i>
+                            <p>Belum ada file yang diupload</p>
+                        </div>
+                    `;
+                    actionButtons.style.display = 'none';
+                    updateFileCount();
+                    showNotification('info', 'Semua file berhasil dihapus!');
+                }
+            }
+
+            function updateFileCount() {
+                fileCount.textContent = `${uploadedFiles.length} file`;
+            }
+
+            function showNotification(type, message) {
+                const notificationEl = document.getElementById('notification');
+                const notificationMessage = notificationEl.querySelector('.notification-message');
+                const notificationIcon = notificationEl.querySelector('.notification-icon i');
+                
+                notificationEl.className = `notification ${type}`;
+                notificationMessage.textContent = message;
+                
+                if (type === 'success') {
+                    notificationIcon.className = 'fas fa-check-circle';
+                } else if (type === 'error') {
+                    notificationIcon.className = 'fas fa-exclamation-circle';
+                } else if (type === 'info') {
+                    notificationIcon.className = 'fas fa-info-circle';
+                }
+                
+                notificationEl.classList.add('show');
+                
+                setTimeout(() => {
+                    notificationEl.classList.remove('show');
+                }, 3000);
+            }
+
+            function showProgress() {
+                progressContainer.style.display = 'block';
+                updateProgress(0);
+            }
+
+            function hideProgress() {
+                progressContainer.style.display = 'none';
+            }
+
+            function updateProgress(percent) {
+                progressBar.style.width = `${percent}%`;
+                progressText.textContent = `${Math.round(percent)}%`;
+            }
+        });
+    </script>
+</body>
+</html>
